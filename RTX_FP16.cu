@@ -1,10 +1,10 @@
 /*
- HPEC-25_paper CUDA code for RTX 3060 and Ada Lovelac 1000
-FP16 Input
+ HPEC-25 Paper CUDA code for fp16 inputs
  */
 
 #include <assert.h>
 #include <bitset>
+#include <cstdlib>
  //#include <unistd.h>
 #include <cstdint>
 #include <chrono>
@@ -294,39 +294,32 @@ int main(int argc, char** argv) {
     --------------------------------------------------------------*/
     /*Assuming the FMA size is less than permitted max shared dimension of tc*/
     int k = 2, necb = 0, NFMA = 0, ecb = 0;;
-    float c = 0, prod_r_sum = 0;
+    float c = 0, d_pos = 0,d_neg=0;
     while (k<15)
     {
+        // positive axis
         host_reset(h_a, h_b, h_c);
-        prod_r_sum = 0;
-        c = 0;
-        // setting c from Algo 1 from HPEC-25 paper
-        h_c[0] = 2 - ldexp(1, -pin + 1);
-        for (int i = 1; i <= (ceil(log2(k))); i++)
-        {
-            h_c[0] = h_c[0] + ldexp(1, -pout + i);
-
-        }
-        c = h_c[0];
-        //setting rs as per Algo 1 from HPEC-25 paper
-        for(int i=0;i<(k-1);i++)
-        {
-            h_a[i] = __float2half(2 - ldexp(1, -pin + 1));
-            prod_r_sum= prod_r_sum+__half2float(h_a[i]);
-            h_b[i] = __float2half(1);
-        }
+        h_c[0] = 1 + ldexp(1, -pout + 1);
+        h_a[0] = __float2half(1);
+        h_b[0] = __float2half(1);
+        h_b[k - 1] = h_b[0];
         h_a[k - 1] = __float2half(ldexp(1, -pout + 1));
-        h_b[k - 1] = __float2half(1);
-        prod_r_sum = prod_r_sum+__half2float(h_a[k-1]);
-
         wmma_init_run(h_a, h_b, h_c, d16_a, d16_b, d_c, false);
-        if (h_c[0] != (c + prod_r_sum))
+        d_pos = h_c[0];
+        // negative axis
+        host_reset(h_a, h_b, h_c);
+        h_c[0] = -1 - ldexp(1, -pout + 1);
+        h_a[0] = __float2half(-1);
+        h_b[0] = __float2half(1);
+        h_b[k - 1] = h_b[0];
+        h_a[k - 1] = __float2half(-ldexp(1, -pout + 1));
+        wmma_init_run(h_a, h_b, h_c, d16_a, d16_b, d_c, false);
+        d_neg = h_c[0];
+        if ( d_pos != (2 + ldexp(1, -pout + 2) ) && abs(d_neg) != (2 + ldexp(1, -pout + 2) ) )
         {
             NFMA = k - 1;
-            necb = log2(ceil(2 * (k - 1) / (2 - ldexp(1, -pin + 1))) - 1);
-            if (NFMA > 1)
-            {        ecb = 1;
-            }
+            ecb = 1;
+            necb = log2(ceil(2 * (k - 1) / (2 - pow(2, -pin + 1))) - 1);
             break;
         }
         k = k + 1;
