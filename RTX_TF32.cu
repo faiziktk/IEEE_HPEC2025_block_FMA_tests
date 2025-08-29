@@ -1,20 +1,9 @@
-﻿/*
- * Copyright (c) 2020, Massimiliano Fasi and Mantas Mikaitis
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, version 2.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- *  You should have received a copy of the GNU General Public License along with
- *  this program. If not, see <http://www.gnu.org/licenses/>.
+/*
+HPEC-25 Paper CUDA code for TF32 input 
  */
 
 #include <assert.h>
+#include<cstdlib>
 #include <cstdint>
 #include <chrono>
 #include <iostream>
@@ -261,48 +250,48 @@ int main(int argc, char** argv) {
     * ------------------------------------------------------------
     --------------------------------------------------------------*/
     /*Assuming the FMA size is less than permitted max shared dimension of tc*/
+    /*------------------------------------------------------------
+    * ------------------------------------------------------------
+    *
+    *               2: Extra Carry Bits (Iterative Approach)
+    *
+    * ------------------------------------------------------------
+    --------------------------------------------------------------*/
+    /*Assuming the FMA size is less than permitted max shared dimension of tc*/
     int k = 2, necb = 0, NFMA = 0, ecb = 0;;
-    float c = 0, prod_r_sum = 0;
+    float c = 0, d_pos = 0, d_neg = 0;
     while (k < 15)
     {
+        // positive axis
         host_reset(h_a, h_b, h_c);
-        prod_r_sum = 0;
-        c = 0;
-        // setting c from Algo 1 from HPEC-25 paper
-        h_c[0] = 2 - ldexp(1, -pin + 1);
-        for (int i = 1; i <= (ceil(log2(k))); i++)
-        {
-            h_c[0] = h_c[0] + ldexp(1, -pout + i);
-
-        }
-        c = h_c[0];
-        //setting rs as per Algo 1 from HPEC-25 paper
-        for (int i = 0; i < (k - 1); i++)
-        {
-            h_a[i] = (2 - ldexp(1, -pin + 1));
-            prod_r_sum = prod_r_sum + (h_a[i]);
-            h_b[i] = (1);
-        }
+        h_c[0] = 1 + ldexp(1, -pout + 1);
+        h_a[0] = (1);
+        h_b[0] = (1);
+        h_b[k - 1] = h_b[0];
         h_a[k - 1] = (ldexp(1, -pout + 1));
-        h_b[k - 1] = (1);
-        prod_r_sum = prod_r_sum + (h_a[k - 1]);
-
         wmma_init_run(h_a, h_b, h_c, d_a, d_b, d_c, false);
-        if (h_c[0] != (c + prod_r_sum))
+        d_pos = h_c[0];
+        // negative axis
+        host_reset(h_a, h_b, h_c);
+        h_c[0] = -1 - ldexp(1, -pout + 1);
+        h_a[0] = (-1);
+        h_b[0] = (1);
+        h_b[k - 1] = h_b[0];
+        h_a[k - 1] = (-ldexp(1, -pout + 1));
+        wmma_init_run(h_a, h_b, h_c, d_a, d_b, d_c, false);
+        d_neg = h_c[0];
+        if (d_pos != (2 + ldexp(1, -pout + 2)) && abs(d_neg) != (2 + ldexp(1, -pout + 2)))
         {
             NFMA = k - 1;
-            necb = log2(ceil(2 * (k - 1) / (2 - ldexp(1, -pin + 1))) - 1);
-            if (NFMA > 1)
-            {
-                ecb = 1;
-            }
+            ecb = 1;
+            necb = log2(ceil(2 * (k - 1) / (2 - pow(2, -pin + 1))) - 1);
             break;
         }
         k = k + 1;
     }
-    printheader(outfile, "Feature 2. Extra carry bits determination fp16/bf16 inputs");// ;
+    printheader(outfile, "Feature 2. Extra carry bits determination TF32 inputs");// ;
     printf("Number of extra bits detected are: %d\n", necb);
-
+    
     /*------------------------------------------------------------
     * ------------------------------------------------------------
     *
@@ -310,7 +299,7 @@ int main(int argc, char** argv) {
     *
     * ------------------------------------------------------------
     --------------------------------------------------------------*/
-    printheader(outfile, "Feature 3. FMA size for fp16/bf16 inputs");// ;
+    printheader(outfile, "Feature 3. FMA size for TF32 inputs");// ;
     printf("The FMA size is: %d\n", NFMA);
 
 
