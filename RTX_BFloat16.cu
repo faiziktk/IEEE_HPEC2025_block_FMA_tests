@@ -1,20 +1,9 @@
-﻿/*
- * Copyright (c) 2020, Massimiliano Fasi and Mantas Mikaitis
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, version 2.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- *  You should have received a copy of the GNU General Public License along with
- *  this program. If not, see <http://www.gnu.org/licenses/>.
+/*
+ * HPEC-25 Paper CUDA Code
  */
 
 #include <assert.h>
+#include<cstdlib>
 //#include <unistd.h>
 #include <cstdint>
 #include <chrono>
@@ -258,40 +247,31 @@ int main(int argc, char** argv) {
     --------------------------------------------------------------*/
     /*Assuming the FMA size is less than permitted max shared dimension of tc*/
     int k = 2, necb = 0, NFMA = 0, ecb = 0;;
-    float c = 0, prod_r_sum = 0;
+    float d_pos = 0,d_neg=0;
     while (k < 15)
     {
         host_reset(h_a, h_b, h_c);
-        prod_r_sum = 0;
-        c = 0;
-        // setting c from Algo 1 from HPEC-25 paper
-        h_c[0] = 2 - ldexp(1, -pin + 1);
-        for (int i = 1; i <= (ceil(log2(k))); i++)
-        {
-            h_c[0] = h_c[0] + ldexp(1, -pout + i);
-
-        }
-        c = h_c[0];
-        //setting rs as per Algo 1 from HPEC-25 paper
-        for (int i = 0; i < (k - 1); i++)
-        {
-            h_a[i] = __float2bfloat16(2 - ldexp(1, -pin + 1));
-            prod_r_sum = prod_r_sum + __bfloat162float(h_a[i]);
-            h_b[i] = __float2bfloat16(1);
-        }
+        h_c[0] = 1 + ldexp(1, -pout + 1);
+        h_a[0] = __float2bfloat16(1);
+        h_b[0] = __float2bfloat16(1);
+        h_b[k - 1] = h_b[0];
         h_a[k - 1] = __float2bfloat16(ldexp(1, -pout + 1));
-        h_b[k - 1] = __float2bfloat16(1);
-        prod_r_sum = prod_r_sum + __bfloat162float(h_a[k - 1]);
-
         wmma_init_run(h_a, h_b, h_c, d16_a, d16_b, d_c, false);
-        if (h_c[0] != (c + prod_r_sum))
+        d_pos = h_c[0];
+        // negative axis
+        host_reset(h_a, h_b, h_c);
+        h_c[0] = -1 - ldexp(1, -pout + 1);
+        h_a[0] = __float2bfloat16(-1);
+        h_b[0] = __float2bfloat16(1);
+        h_b[k - 1] = h_b[0];
+        h_a[k - 1] = __float2bfloat16(-ldexp(1, -pout + 1));
+        wmma_init_run(h_a, h_b, h_c, d16_a, d16_b, d_c, false);
+        d_neg = h_c[0];
+        if (d_pos != (2 + ldexp(1, -pout + 2)) && abs(d_neg) != (2 + ldexp(1, -pout + 2)))
         {
             NFMA = k - 1;
-            necb = log2(ceil(2 * (k - 1) / (2 - ldexp(1, -pin + 1))) - 1);
-            if (NFMA > 1)
-            {
-                ecb = 1;
-            }
+            ecb = 1;
+            necb = log2(ceil(2 * (k - 1) / (2 - pow(2, -pin + 1))) - 1);
             break;
         }
         k = k + 1;
