@@ -7,7 +7,7 @@ clc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set up input and output formats.
 % Note the default rounding mode in CPFloat is RN-TE.
-inoptions.format = 'binary16';
+inoptions.format = 'binary16'; % 
 outoptions.format = 'binary32';
 %% 
 % This test checks the number of extra alignment bits
@@ -39,7 +39,7 @@ else
 
 end
 if bool_eab_test_2==1
-disp('Two bits exist in alignment');
+disp('Two bits exist in alignment, necb>=2');
 else
 disp('Two bits does not exist in alignment');    
 end
@@ -144,13 +144,14 @@ while 1
 
 a=zeros(1,inputsize);
 b=ones(1,inputsize);
-expshift=ceil(log2(k));
-c=2-2^(-pin)+sum(2.^(-(pout:-1:pout-(expshift-1))));
-a( 1:(k-1) )=2-2^(-pin);
+c=1+2^(-pout);
+a( 1 )=1;
 a(k)=2^(-pout);
-[d,dbits,exp,sign] = A100InnPrdModel(a, b, c, inoptions, outoptions);
-d = bin2dec_frac(dbits)*2^(exp);
-if d~=(sum(a)+c)
+[dp,dbits,exp,sign] = A100InnPrdModel(a, b, c, inoptions, outoptions);
+[dn,dbits,exp,sign] = A100InnPrdModel(-a, b, -c, inoptions, outoptions);
+
+%d = bin2dec_frac(dbits)*2^(exp);
+if dp~=(2+2^(-pout+1)) & abs(dn)~=(2+2^(-pout+1))
      NFMA=k-1;
      necb=log2(ceil(2*NFMA/(2-2^(-pin+1)))-1);
      break;
@@ -179,25 +180,24 @@ k=2; % HPEC paper Algorithm 1
 flag=1;
 counter=1;
 while flag
-        a=zeros(1,inputsize);
-        b=ones(1,inputsize);
-        expshift=ceil(log2(k));
-        c=2-2^(-pin)+sum(2.^(-(pout:-1:pout-(expshift-1))));
-        a( 1:(k-1) )=2-2^(-pin);
-        a(k)=2^(-pout);
-        [d,dbits,exp,sign] = A100InnPrdModel(a, b, c, inoptions, outoptions);
-        d = bin2dec_frac(dbits)*2^(exp);
-        if d==(sum(a)+c)
-        neab(counter)=nextpow2(round(k*(2-2^(-pin))))-1; % new relation
-        k=k+1;
-        else
-            flag=0;
-            NFMA=k-1;
-        end
-        counter=counter+1;
+     a=zeros(1,inputsize);
+     b=ones(1,inputsize);
+     c=1+2^(-pout);
+     a( 1 )=1;
+     a(k)=2^(-pout);
+    [dp,dbits,exp,sign] = A100InnPrdModel(a, b, c, inoptions, outoptions);
+    [dn,dbits,exp,sign] = A100InnPrdModel(-a, b, -c, inoptions, outoptions);
+
+%d = bin2dec_frac(dbits)*2^(exp);
+if dp~=(2+2^(-pout+1)) & abs(dn)~=(2+2^(-pout+1))
+     NFMA=k-1;
+     necb=log2(ceil(2*NFMA/(2-2^(-pin+1)))-1);
+     break;
+end
+k=k+1;
 end
 
-disp(strcat('Number of Extra Carry Bits= ',num2str(neab(end))));
+disp(strcat('Number of Extra Carry Bits= ',num2str(necb)));
 disp('===============================================================')
 disp('Numerical Feature 8: FMA Size for tf32 Input')
 
@@ -206,6 +206,9 @@ disp(strcat('The FMA size is=',num2str(NFMA)));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Rounding Mode for Multiple Block FMA results
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% A model with 2 or mode extra alignment bits, this numerical feature will be
+% same as output mode of a single BFMA, otherwise, the rounding mode
+% reflected may be of the alignment roundign mode within a single BFMA
 disp('===============================================================')
 disp('Numerical Feature 9: Rounding Mode in Compilation of Multiple BFMAs Results')
 inoptions.format = 'binary16';
@@ -232,7 +235,7 @@ elseif dp==(1+2^(-pout+2)) & abs(dn)==(1+2^(-pout+2))
 else
 
 end
-
+disp('Multiple Block FMA compilation for two BFMA may have alignment rounding mode');
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
