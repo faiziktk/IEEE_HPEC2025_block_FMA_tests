@@ -1,19 +1,20 @@
 function [DecOut,BinFixOut,OutExp,OutSignBit ] = A100InnPrdModel(a,b,c,inopts,outopts)
 % Developed by FA Khattak, 28/7/25
-% Fully generalized model for inner product modelling of a tensor core in
-% lower precision with multiple types of rounding mode
 % takes different rounding mode for alignment, normalisation
 % set the rounding mode here in alignment stage
-%align_round_mode='truncation';
+
+% user variable for multiple stuff
 DecOut = 0; % output
-norm_round='TRC'; % truncation 
-align_round='TRC';
-neab=1;
+norm_round='TRC'; % TRC, RU, RD, RNE rounding mode work
+align_round='RNE'; % TRC, RU, RD, RNE rounding modes
+neab=2; % can vary the number of extra carry bits
+NFMA=8;
+
+% parameter variable declaration and initialization
+params.fma=NFMA;
 params.eab=neab;
 params.align_round_mode=align_round;
 params.norm_round_mode=norm_round;
-NFMA=8;
-params.fma=NFMA;
 
 
 switch inopts.format
@@ -106,11 +107,16 @@ function [DecOut,BinFixOut,FinalExp,OutSignBit] = Generic_BFMA(a, b, c, inopts, 
      BitCharArray(:,CharLength+1:bitadd+CharLength)=zerobits;
  end
  
+
+
+
 if NoOutManBits<23
-    % if binary16/bf16 is output perform addition in SP
-    [OutSignBit,resultStr]=AddSignificandsWithRound(BitCharArray,params,23,SignBits);
+    [BitStrArray,BitCharArray]= ApplyRoundingPostAlignment(SignBits,BitCharArray,params,23,ExpArray);
+    [OutSignBit, resultStr] = fixedPointStringAddSub(SignBits, BitStrArray, 'add'); % addition
+
 else
-    [OutSignBit,resultStr]=AddSignificandsWithRound(BitCharArray,params,NoOutManBits,SignBits);
+    [BitStrArray,BitCharArray]= ApplyRoundingPostAlignment(SignBits,BitCharArray,params,NoOutManBits,ExpArray);    
+    [OutSignBit, resultStr] = fixedPointStringAddSub(SignBits, BitStrArray, 'add'); % addition
 end 
 
  %% Normalisation procedure keeping extra carry bits and extra alignment bits
@@ -123,11 +129,16 @@ end
  DecOut = bin2dec_frac(BinFixOut)*2^FinalExp;
  
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%   Block Alignment Rounding/Truncation As Per Intel Arith Paper 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%   Calling adding/substraction 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [OutSignBit,resultStr]=AddSignificandsWithRound(BitCharArray,params,NoOutManBits,SignBits)
+function [OutSignBit,resultStr]=RoundPostAlign(BitCharArray,params,NoOutManBits,SignBits)
 % some parameters extraction and casting
 AlignRoundMode=params.align_round_mode;
 neab=params.eab;
@@ -141,7 +152,7 @@ if strcmp(AlignRoundMode,'TRC')
                 BitCharArray(:,1+1+NoOutManBits+neab+1:end)=[];
                 BitStrArray=string(BitCharArray);
                 % add all signficands at once
-                [OutSignBit, resultStr] = fixedPointStringAddSub(SignBits, BitStrArray, 'add'); % addition
+                
 else
    BitsBeyondAlignBit=numel(BitCharArray(1,2+NoOutManBits+neab+1:end));
          if BitsBeyondAlignBit==0 % similar to truncation
@@ -507,14 +518,14 @@ end
 BitCharArray(:,OutCharLength+1:end)=[]; % discard bit beyond output precision
 
 %% --------------- 1: Round towards Zero or Truncation ----------------------
-if RoundMode=='TRC'|RoundMode=='RTZ' 
+if strcmp(RoundMode,'TRC')|strcmp(RoundMode,'RTZ') 
     % BitStringArray=string(BitCharArray);
      return
 end    
 
 %% --------------- 2: Round towards Postive Infinity ----------------------
 ZeroCharsArray=char(zeros(1,OutCharLength-3)+'0');
-if RoundMode=='RPI' % Round Positive Infinity
+if strcmp(RoundMode,'RU') % Round Positive Infinity
     
     ZeroCharsArray=char(zeros(1,OutCharLength-3)+'0');
     
@@ -545,7 +556,7 @@ end
 %% --------------- 3: Round towards Negative Infinity ----------------------
 %% ------------------------------------------------------------------------
 
-if RoundMode=='RNI' % Round Positive Infinity
+if strcmp(RoundMode,'RD') % Round Positive Infinity
     
     
     
@@ -639,7 +650,7 @@ end
 %%#########################################################################
 %% Function Rounding Mode Post Alignment
 %% ########################################################################
-function [BitStringArray,BitCharArray]= ApplyRoundingPostAlignment(SignBits,BitCharArray,params,out_nmb,out_neb,Expts)
+function [BitStringArray,BitCharArray]= ApplyRoundingPostAlignment(SignBits,BitCharArray,params,out_nmb,Expts)
 RoundMode=params.align_round_mode;
 CharLength=numel(BitCharArray(1,:));
 OutCharLength=2+out_nmb+params.eab;
@@ -655,14 +666,14 @@ end
 BitCharArray(:,OutCharLength+1:end)=[]; % discard bit beyond output precision
 
 %% --------------- 1: Round towards Zero or Truncation ----------------------
-if RoundMode=='TRC'|RoundMode=='RTZ' 
+if strcmp(RoundMode,'TRC')|strcmp(RoundMode,'RZ') 
      BitStringArray=string(BitCharArray);
      return
 end    
 
 %% --------------- 2: Round towards Postive Infinity ----------------------
 ZeroCharsArray=char(zeros(1,OutCharLength-3)+'0');
-if RoundMode=='RPI' % Round Positive Infinity
+if strcmp(RoundMode,'RU') % Round Positive Infinity
     
     ZeroCharsArray=char(zeros(1,OutCharLength-3)+'0');
     
@@ -693,7 +704,7 @@ end
 %% --------------- 3: Round towards Negative Infinity ----------------------
 %% ------------------------------------------------------------------------
 
-if RoundMode=='RNI' % Round Positive Infinity
+if strcmp(RoundMode,'RD') % Round Positive Infinity
     
     
     
