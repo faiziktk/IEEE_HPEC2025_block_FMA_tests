@@ -134,30 +134,41 @@ inoptions.format = 'binary16';
 outoptions.format = 'binary32';
 inputsize=16;
 pin=11; % fp16 input
-pin=pin-1;
 pout=24;% fp32 output, assuming 1 implicit bit in there
-pout=pout-1;
 k=2; % HPEC paper Algorithm 1
 flag=1;
 counter=1;
-while 1
-
-a=zeros(1,inputsize);
-b=ones(1,inputsize);
-c=1+2^(-pout);
-a( 1 )=1;
-a(k)=2^(-pout);
-[dp,dbits,exp,sign] = A100InnPrdModel(a, b, c, inoptions, outoptions);
-[dn,dbits,exp,sign] = A100InnPrdModel(-a, b, -c, inoptions, outoptions);
+while flag
+      lgk=ceil(log2(k));
+     a=zeros(1,inputsize);
+     b=ones(1,inputsize);
+     c=1+2^(-pout+1);
+     a(1)=1;
+     a(k)=2^(-pout+1);
+    [dp,dbits,exp,sign] = A100InnPrdModel(a, b, c, inoptions, outoptions);
+    [dn,dbits,exp,sign] = A100InnPrdModel(-a, b, -c, inoptions, outoptions);
 
 %d = bin2dec_frac(dbits)*2^(exp);
-if dp~=(2+2^(-pout+1)) & abs(dn)~=(2+2^(-pout+1))
+if dp~=(2+2^(-pout+2)) & abs(dn)~=(2+2^(-pout+2))
      NFMA=k-1;
-     necb=log2(ceil(2*NFMA/(2-2^(-pin+1)))-1);
      break;
 end
+
+% necb update and product initilization
+     a=zeros(1,inputsize);
+     b=ones(1,inputsize);
+     c=2-2^(-pin+1)+sum(2.^(-pout+1:-pout+lgk));
+     a(1:k-1)=2-2^(-pin+1);
+     a(k)=2^(-pout+1);
+     [dp,dbits,exp,sign] = A100InnPrdModel(a, b, c, inoptions, outoptions);
+    %[dn,dbits,exp,sign] = A100InnPrdModel(-a, b, -c, inoptions, outoptions);
+
+%d = bin2dec_frac(dbits)*2^(exp);
+if dp==(c+sum(a))
+     necb=floor(log2(k*(2-2^(-pin+1))));
+end
 k=k+1;
-counter=counter+1;
+
 end
 disp(strcat('Number of Extra Carry Bits=',num2str(necb)));
 disp('===============================================================')
@@ -346,5 +357,6 @@ function dec = bin2dec_frac(binStr)
     % Sum
     dec = intVal + fracVal;
 end
+
 
 
