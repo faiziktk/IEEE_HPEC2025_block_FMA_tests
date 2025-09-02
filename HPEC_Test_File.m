@@ -204,7 +204,7 @@ end
 
 %d = bin2dec_frac(dbits)*2^(exp);
 if dp==(c+sum(a))
-     necb=floor(log2(ceil(2*k/(2-2^(-pin+1)))-1));
+     necb=floor(log2(k*(2-2^(-pin+1))));
 end
 k=k+1;
 
@@ -346,4 +346,5 @@ function dec = bin2dec_frac(binStr)
     % Sum
     dec = intVal + fracVal;
 end
+
 
