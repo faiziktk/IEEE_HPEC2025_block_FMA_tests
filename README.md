@@ -15,7 +15,7 @@ A sample output of the CUDA file for FP16 is shown below:<br>
 ---------------------------------------------------------------------------------------------------------------------------------------<br>
 
 **MATLAB Files**<br>
-These files require CPFloat library to be installed in Matlab.<br>
+These files require CPFloat library (can be found at https://github.com/north-numerical-computing/cpfloat) to be installed in Matlab.<br>
 Precision bits for input and output include both mantissa and implicit bit
 **A100InnPrdModel.m** is the model where alignment and normalisation rounding mode, extra alignment bits (neab) and FMA size can be set to model different model for BFMA.<br>
 <img width="881" height="140" alt="image" src="https://github.com/user-attachments/assets/5e1ab432-ff82-467f-af54-d8d85dced272" /><br>
