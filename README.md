@@ -78,5 +78,5 @@ Delayed/Late normalization
 **===END===END===END===END===END===END===END===END===END===END===END**
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-For simulating different modes, change AlignRoundMode, NormRoundMode, extra alignment bits via neab or the FMA size.
+For simulating different BFMA models, change AlignRoundMode, NormRoundMode, extra alignment bits via neab or the FMA size.
 
