@@ -1,22 +1,21 @@
-function [DecOut,BinFixOut,OutExp,OutSignBit ] = A100InnPrdModel(a,b,c,inopts,outopts)
+function [d,dbits,dexp,dsign ] = A100InnPrdModel(a,b,c,inopts,outopts)
 % Developed by FA Khattak, 28/7/25
 % takes different rounding mode for alignment, normalisation
 % set the rounding mode here in alignment stage
 
 % user variable for multiple stuff
-DecOut = 0; % output
-
+d = 0; % output
 % Vary these below parameter to simulate a different model
-norm_round='RNE'; % TRC, RU, RD, RNE rounding mode work
-align_round='RD'; % TRC, RU, RD, RNE rounding modes
-neab=1; % can vary the number of extra carry bits
+NormRoundMode='RNE'; % TRC, RU, RD, RNE rounding mode work
+AlignRoundMode='RD'; % TRC, RU, RD, RNE rounding modes
+neab=1; % extra alignment bits can be varied, 0,1 for alignment rounding mode only,
 NFMA=8;
 
 % parameter variable declaration and initialization
 params.fma=NFMA;
 params.eab=neab;
-params.align_round_mode=align_round;
-params.norm_round_mode=norm_round;
+params.align_round_mode=AlignRoundMode;
+params.norm_round_mode=NormRoundMode;
 
 
 switch inopts.format
@@ -48,14 +47,13 @@ end
 nFMAs=K/NFMA;
 %% nFMAs block FMA operations
 for n=1:nFMAs
-    [c,BinFixOut,OutExp,OutSignBit] = Generic_BFMA( a( (n-1)*NFMA+1:n*NFMA ), b( (n-1)*NFMA+1:n*NFMA ), c, inopts, outopts,params);
-    c=(OutSignBit==1)*(-c)+(OutSignBit==0)*c;
+    [c,dbits,dexp,dsign] = Generic_BFMA( a( (n-1)*NFMA+1:n*NFMA ), b( (n-1)*NFMA+1:n*NFMA ), c, inopts, outopts,params);
+    c=(dsign==1)*(-c)+(dsign==0)*c;
 end
 
-DecOut=c;
+d=c;
 
 end
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% ---------------------  Generic BFMA -----------------------------------------------------
@@ -784,3 +782,4 @@ BitStringArray=string(BitCharArray);
 
 
 end
+
