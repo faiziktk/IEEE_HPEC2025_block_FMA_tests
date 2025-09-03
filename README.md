@@ -10,13 +10,14 @@ Author: **Faizan A Khattak**, **Mantas Mikaitis**
 4. These files can be run as they are on windows machine, for linux, may be some other header file have been to included.
 
 
-**MATLAB Files**
+**MATLAB Files**<br>
 These files require CPFloat library to be installed in Matlab.<br>
 Precision bits for input and output include both mantissa and implicit bit
-**A100InnPrdModel.m** is the model where alignment and normalisation rounding mode, extra alignment bits (neab) and FMA size can be set to model different model for BFMA
-<img width="881" height="140" alt="image" src="https://github.com/user-attachments/assets/5e1ab432-ff82-467f-af54-d8d85dced272" />
+**A100InnPrdModel.m** is the model where alignment and normalisation rounding mode, extra alignment bits (neab) and FMA size can be set to model different model for BFMA.<br>
+<img width="881" height="140" alt="image" src="https://github.com/user-attachments/assets/5e1ab432-ff82-467f-af54-d8d85dced272" /><br>
 
-**HPEC_Test_File.m** applies the test vectors of the above paper to **A100InnPrdModel**. A sample output is shown below
+**HPEC_Test_File.m** applies the test vectors of the above paper to **A100InnPrdModel**.<br> 
+A sample output is shown below<br>
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -71,7 +72,7 @@ Multiple Block FMA compilation for two BFMAs may reflect internal alignment roun
 
 ===============================================================
 
-Numerical Feature 10: Normalisation Pattern Within a BFMA
+Numerical Feature 10: Normalisation Pattern Within a BFMA<br>
 Delayed/Late normalization
 
 **===END===END===END===END===END===END===END===END===END===END===END**
