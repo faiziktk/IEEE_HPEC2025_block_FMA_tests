@@ -5,6 +5,8 @@ function [DecOut,BinFixOut,OutExp,OutSignBit ] = A100InnPrdModel(a,b,c,inopts,ou
 
 % user variable for multiple stuff
 DecOut = 0; % output
+
+% Vary these below parameter to simulate a different model
 norm_round='RNE'; % TRC, RU, RD, RNE rounding mode work
 align_round='RD'; % TRC, RU, RD, RNE rounding modes
 neab=1; % can vary the number of extra carry bits
@@ -779,5 +781,6 @@ return
 end
 
 BitStringArray=string(BitCharArray);
+
 
 end
