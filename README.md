@@ -13,5 +13,6 @@ Author: **Faizan A Khattak**, **Mantas Mikaitis**
 **MATLAB Files**
 These files require CPFloat library to be installed in Matlab
 Precision bits for input and output include both mantissa and implicit bit
-**A100InnPrdModel.m** is the model where 
+**A100InnPrdModel.m** is the model where alignment and normalisation rounding mode, extra alignment bits (neab) and FMA size can be set to model different model for BFMA
+<img width="1038" height="140" alt="image" src="https://github.com/user-attachments/assets/4e6dff24-d130-43c1-a7ca-70c6bc677d6a" />
    
