@@ -5,9 +5,9 @@ function [DecOut,BinFixOut,OutExp,OutSignBit ] = A100InnPrdModel(a,b,c,inopts,ou
 
 % user variable for multiple stuff
 DecOut = 0; % output
-norm_round='TRC'; % TRC, RU, RD, RNE rounding mode work
-align_round='RNE'; % TRC, RU, RD, RNE rounding modes
-neab=2; % can vary the number of extra carry bits
+norm_round='RNE'; % TRC, RU, RD, RNE rounding mode work
+align_round='RD'; % TRC, RU, RD, RNE rounding modes
+neab=1; % can vary the number of extra carry bits
 NFMA=8;
 
 % parameter variable declaration and initialization
