@@ -1,4 +1,4 @@
-/*
+﻿/*
 HPEC-25 Paper CUDA code for TF32 input 
  */
 
@@ -284,9 +284,10 @@ int main(int argc, char** argv) {
         {
             NFMA = k - 1;
             ecb = 1;
-            necb = log2(ceil(2 * (k - 1) / (2 - pow(2, -pin + 1))) - 1);
+            
             break;
         }
+        necb = floor(log2(k * (2 - ldexp(1, -pin + 1))));
         k = k + 1;
     }
     printheader(outfile, "Feature 2. Extra carry bits determination TF32 inputs");// ;
@@ -504,6 +505,68 @@ int main(int argc, char** argv) {
 
 
     
+
+    /*------------------------------------------------------------
+        * ------------------------------------------------------------
+        *
+        *               9: Rounding Mode in Alignment of Significands
+        *
+        * ------------------------------------------------------------
+        --------------------------------------------------------------*/
+        // assuming FMA size is 3 or more for this case
+    j = 0; // any integer within max min limit definde by exponent
+    printheader(outfile, "Feature 8. Rounding Mode in Significands Alignment");// ;
+    host_reset(h_a, h_b, h_c);
+    // NFMA has been computed above, so should work
+    h_c[0] = pow(2, j);
+    h_a[0] = (ldexp(1, -pout + j));
+    h_a[1] = (ldexp(1, -pout + j));
+
+    h_b[0] = (ldexp(1, -neab) + ldexp(1, -neab - 1));
+    h_b[1] = (ldexp(1, -neab) + ldexp(1, -neab - 1));
+    wmma_init_run(h_a, h_b, h_c, d_a, d_b, d_c, false);
+    h_c_pos = h_c[0];
+
+    host_reset(h_a, h_b, h_c);
+    h_c[0] = -pow(2, j);
+    h_a[0] = (-ldexp(1, -pout + j));
+    h_a[1] = (-ldexp(1, -pout + j));
+
+    h_b[0] = (ldexp(1, -neab) + ldexp(1, -neab - 1));
+    h_b[1] = (ldexp(1, -neab) + ldexp(1, -neab - 1));
+    wmma_init_run(h_a, h_b, h_c, d_a, d_b, d_c, false);
+
+    h_c_neg = h_c[0];
+
+    rz_const = pow(2, j);
+    rne_const = pow(2, j) + ldexp(1, -pout + j + 2 - neab);
+
+
+
+    if (h_c_pos == rz_const & h_c_neg == -rz_const)
+    {
+        printf("-> Round towards zero/truncation\n");
+
+    }
+
+    else if (h_c_pos == rne_const & h_c_neg == -rne_const)
+    {
+        printf("-> Round to nearest (even)\n");
+
+    }
+    else if (h_c_pos == rne_const & h_c_neg == -rz_const)
+    {
+        printf("-> Round up!\n");
+    }
+    else if (h_c_pos == rz_const & h_c_neg == -rne_const)
+    {
+        printf("-> Round down\n");
+    }
+    else
+    {
+        printf("-> This test is not working!\n");
+    }
+
 
 
 
