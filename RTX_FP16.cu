@@ -1,5 +1,17 @@
 /*
- HPEC-25 Paper CUDA code for fp16 inputs
+ * Copyright (c) 2020, Massimiliano Fasi and Mantas Mikaitis
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ *  You should have received a copy of the GNU General Public License along with
+ *  this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <assert.h>
@@ -284,7 +296,6 @@ int main(int argc, char** argv) {
         printf("->Two bits existence test: Failed\n");
     }
     
-
     /*------------------------------------------------------------
     * ------------------------------------------------------------
     *
@@ -319,9 +330,9 @@ int main(int argc, char** argv) {
         {
             NFMA = k - 1;
             ecb = 1;
-            necb = log2(ceil(2 * (k - 1) / (2 - pow(2, -pin + 1))) - 1);
             break;
         }
+        necb = floor(log2(k*(2-ldexp(1,-pin+1))));
         k = k + 1;
     }
     printheader(outfile, "Feature 2. Extra carry bits determination fp16/bf16 inputs");// ;
@@ -592,6 +603,69 @@ int main(int argc, char** argv) {
     {
         printf("-> This test is not working!\n");
     }
+
+
+    /*------------------------------------------------------------
+        * ------------------------------------------------------------
+        *
+        *               9: Rounding Mode in Alignment of Significands
+        *
+        * ------------------------------------------------------------
+        --------------------------------------------------------------*/
+        // assuming FMA size is 3 or more for this case
+    j = 0; // any integer within max min limit definde by exponent
+    printheader(outfile, "Feature 9. Rounding Mode in Significands Alignment");// ;
+    host_reset(h_a, h_b, h_c);
+    // NFMA has been computed above, so should work
+    h_c[0] = pow(2,j);
+    h_a[0] = __float2half(ldexp(1, -pout+j));
+    h_a[1] = __float2half(ldexp(1, -pout+j));
+
+    h_b[0] = __float2half(ldexp(1,-neab) + ldexp(1,-neab-1));
+    h_b[1] = __float2half(ldexp(1, -neab) + ldexp(1, -neab - 1));
+    wmma_init_run(h_a, h_b, h_c, d16_a, d16_b, d_c, false);
+    h_c_pos = h_c[0];
+
+    host_reset(h_a, h_b, h_c);
+    h_c[0] = -pow(2, j);
+    h_a[0] = __float2half(-ldexp(1, -pout + j));
+    h_a[1] = __float2half(-ldexp(1, -pout + j));
+
+    h_b[0] = __float2half(ldexp(1, -neab) + ldexp(1, -neab - 1));
+    h_b[1] = __float2half(ldexp(1, -neab) + ldexp(1, -neab - 1));
+    wmma_init_run(h_a, h_b, h_c, d16_a, d16_b, d_c, false);    
+   
+    h_c_neg = h_c[0];
+
+    rz_const = pow(2,j);
+    rne_const = pow(2,j) + ldexp(1, -pout + j+2-neab);
+
+
+
+    if (h_c_pos == rz_const & h_c_neg == -rz_const)
+    {
+        printf("-> Round towards zero/truncation\n");
+
+    }
+
+    else if (h_c_pos == rne_const & h_c_neg == -rne_const)
+    {
+        printf("-> Round to nearest (even)\n");
+
+    }
+    else if (h_c_pos == rne_const & h_c_neg == -rz_const)
+    {
+        printf("-> Round up!\n");
+    }
+    else if (h_c_pos == rz_const & h_c_neg == -rne_const)
+    {
+        printf("-> Round down\n");
+    }
+    else
+    {
+        printf("-> This test is not working!\n");
+    }
+
 
 
 
