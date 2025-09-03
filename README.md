@@ -7,8 +7,12 @@ Author: **Faizan A Khattak**, **Mantas Mikaitis**
 1. **BF16**.cu is **CUDA** program file for brain float 16 tensor core numerical feature determination where test vectors are obtained from the above paper.
 2. **FP16**.cu is **CUDA** program file for half precision binary 16 tensor core numerical feature determination where test vectors are obtained from the above paper.
 3. **TF32**.cu is **CUDA** program file for tensor float 32 tensor core numerical feature determination where test vectors are obtained from the above paper.
-4. These files can be run as they are on windows machine, for linux, may be some other header file have been to included.
+4. These files can be run as they are on windows machine, for linux, may be some other header file have been to included.<br>
 
+A sample output of the CUDA file for FP16 is shown below:<br>
+<img width="597" height="662" alt="image" src="https://github.com/user-attachments/assets/743c88c7-113b-42cd-9a96-85dcc9d5864a" /><br>
+
+---------------------------------------------------------------------------------------------------------------------------------------<br>
 
 **MATLAB Files**<br>
 These files require CPFloat library to be installed in Matlab.<br>
