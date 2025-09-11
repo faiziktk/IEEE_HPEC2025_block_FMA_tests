@@ -79,8 +79,8 @@ Multiple Block FMA compilation for two BFMAs may reflect internal alignment roun
 
 Numerical Feature 10: Normalisation Pattern Within a BFMA<br>
 Delayed/Late normalization<br>
---------------------------------------------------------------------------------------------------------------
 
+--------------------------------------------------------------------------------------------------------------------------
 For simulating different BFMA models, change AlignRoundMode, NormRoundMode, extra alignment bits via neab, and the FMA size.
 
 
