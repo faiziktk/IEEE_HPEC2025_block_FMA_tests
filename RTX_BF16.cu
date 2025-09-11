@@ -1,9 +1,12 @@
-﻿/*
-Created by Faizan A Khattak and Mantas Mikaitis.
-This code is the implementation of 
-Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I by F.A. Khattak and M. Mikaitis, HPEC 2025
-and is based on the previous work by M.Fasi et al. (PeerJ Comput Sci. 2021 Feb 10;7:e330. doi: 10.7717/peerj-cs.330)
- */
+/*
+**Authors**: You (Faizan A. Khattak) and Mantas Mikaitis wrote the code.
+
+**Purpose**: It’s the implementation of your paper:
+“Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I” (HPEC 2025).
+
+**Acknowledgment**: The methodology/code builds on earlier work by Massimiliano Fasi et al., published in PeerJ Computer Science (2021). 
+You even included the exact DOI link to their paper: https://doi.org/10.7717/peerj-cs.330
+*/
 
 #include <assert.h>
 #include<cstdlib>
