@@ -1,7 +1,20 @@
 Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers
 --
-This repository aims to provide the generalized testing methodology to determine the numerical features of matrix multipliers on most recent GPUs. 
-With test method available in this repo, various numerical features such as subnormal support, extra bits for alignment of significand in multiterm addition, extra carry bits, normalisation pattern in multiterm floating point addition, rounding modes, number of multiterm in inner product with single normalisation (FMA size) etc [1]. This work is partially based on the previous work of M. Fasi et.al. [2] whose repository can be found at [link](https://github.com/north-numerical-computing/tensor-cores-numerical-behavior).
+## Overview
+
+This repository provides a **generalized testing methodology** for determining the **numerical features of matrix multipliers** on modern GPUs.  
+
+With the methods available here, you can investigate:  
+
+- Support for **subnormal numbers**  
+- Presence of **extra bits** for significand alignment in multi-term addition  
+- Availability of **extra carry bits**  
+- **Normalization patterns** in multi-term floating-point addition  
+- Supported **rounding modes**  
+- Effective **FMA size** (i.e., number of terms accumulated before a single normalization)  
+
+This work is partially based on the earlier work of **M. Fasi et al.** [2], whose repository can be found [here](https://github.com/north-numerical-computing/tensor-cores-numerical-behavior).  
+
 
 **CUDA C++ File**
 1. [**BF16**.cu](BF16.cu) is **CUDA** program file for brain float 16 tensor core numerical feature determination where test vectors are obtained from the above paper.
