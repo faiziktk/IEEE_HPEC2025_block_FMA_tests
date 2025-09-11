@@ -1,5 +1,5 @@
 /*
-**Authors**: You (Faizan A. Khattak) and Mantas Mikaitis wrote the code.
+**Authors**: Faizan A. Khattak and Mantas Mikaitis.
 
 **Purpose**: It’s the implementation of your paper:
 “Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I” (HPEC 2025).
@@ -584,4 +584,5 @@ int main(int argc, char** argv) {
     cudaFree(d_b);
     cudaFree(d_c);
 }
+
 
