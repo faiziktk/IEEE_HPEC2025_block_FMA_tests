@@ -1,7 +1,4 @@
-HPEC-25 Paper Simulation and Verification Files<br>
-Title: **Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I**<br>
-Author: **Faizan A Khattak**, **Mantas Mikaitis**<br>
-Conference: **HPEC** 2025.
+
 
 
 **CUDA C++ File**
@@ -83,4 +80,9 @@ Delayed/Late normalization<br>
 --------------------------------------------------------------------------------------------------------------------------
 For simulating different BFMA models, change AlignRoundMode, NormRoundMode, extra alignment bits via neab, and the FMA size.
 
-
+References
+--
+HPEC-25 Paper Simulation and Verification Files<br>
+Title: **Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I**<br>
+Author: **Faizan A Khattak**, **Mantas Mikaitis**<br>
+Conference: **HPEC** 2025.
