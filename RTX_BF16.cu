@@ -1,17 +1,8 @@
 ﻿/*
- * Copyright (c) 2020, Massimiliano Fasi and Mantas Mikaitis
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, version 2.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- *  You should have received a copy of the GNU General Public License along with
- *  this program. If not, see <http://www.gnu.org/licenses/>.
+Created by Faizan A Khattak and Mantas Mikaitis.
+This code is the implementation of 
+Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I by F.A. Khattak and M. Mikaitis, HPEC 2025
+and is based on the previous work by M.Fasi et al. (PeerJ Comput Sci. 2021 Feb 10;7:e330. doi: 10.7717/peerj-cs.330)
  */
 
 #include <assert.h>
