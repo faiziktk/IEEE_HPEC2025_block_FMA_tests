@@ -16,9 +16,11 @@ With the methods available here, you can investigate:
 This work is partially based on the earlier work of **M. Fasi et al.** [2], whose repository can be found [here](https://github.com/north-numerical-computing/tensor-cores-numerical-behavior).  
 
 ## Related CUDA Files
-1. [**BF16**.cu](BF16.cu) is CUDA program file where generalized test vectors are given as input to tensor cores using WMMA API with input test vectors format in brain float 16.
-2. [**FP16**.cu](FP16.cu) is CUDA file implements the test vectors in binary16 input format using WMMA API. 
-3. [**TF32**.cu](TF32.cu) implements the tests in tensor float 32 format.
+1. [**BF16**.cu](BF16.cu) CUDA program that applies the generalized test vectors to **Tensor Cores** using the **WMMA API**, with inputs in **bfloat16** format.  
+
+2. [**FP16**.cu](FP16.cu) CUDA program that runs the same test vectors in **binary16 (FP16)** format using the **WMMA API**.  
+ 
+3. [**TF32**.cu](TF32.cu)   CUDA program that runs the tests in **TensorFloat-32 (TF32)** format. 
 4. These files can be run as they are on windows machine, for linux, may be some other header file have been to included.<br>
 
 ## Sample Output of RTX-3060 Tensor Cores Numerical Features 
@@ -36,7 +38,7 @@ A sample output of the CUDA file for FP16 is shown below:<br>
 Precision bits for input and output implicitly consider the implicit bit
 
 ## Sample Output for Matlab Based BFMA Model
-Runing [HPEC_Test_File](HPEC_Test_File.m) would output following numerical features of the model simulated by the user by setting the parameter mentioned above.
+Runing [HPEC_Test_File](HPEC_Test_File.m) would output following numerical features of the model simulated by the user by setting the parameter mentioned above.<br>
 HPEC-25: Tensor Core Matrix Multipliers Numerical Feature Testing
 Authors: Faizan A. Khattak, Mantas Mikaitis
 
