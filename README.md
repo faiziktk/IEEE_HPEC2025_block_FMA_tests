@@ -31,12 +31,12 @@ A sample output of the CUDA file for FP16 is shown below:<br>
 [**A100InnPrdModel**.m](A100InnPrdModel.m) is the model where alignment and normalisation rounding mode, extra alignment bits (neab) and FMA size can be set to model different model for BFMA or inner product. See a sample below where these parameters can be varied.<br>
 <img width="881" height="140" alt="image" src="https://github.com/user-attachments/assets/5e1ab432-ff82-467f-af54-d8d85dced272" /><br>
 
-[**HPEC_Test_File**.m](HPEC_Test_File.m) applies the test vectors of the above paper to [**A100InnPrdModel**.m](A100InnPrdModel.m).<br> 
-A sample output is shown below<br>
+[**HPEC_Test_File**.m](HPEC_Test_File.m) applies the test vectors in [1] to [**A100InnPrdModel**.m](A100InnPrdModel.m).<br> 
 **Note** These files require CPFloat library (can be found at [link](https://github.com/north-numerical-computing/cpfloat)) to be installed in Matlab.<br>
 Precision bits for input and output implicitly consider the implicit bit
 
 ## Sample Output for Matlab Based BFMA Model
+Runing [HPEC_Test_File](HPEC_Test_File.m) would output following numerical features of the model simulated by the user by setting the parameter mentioned above.
 HPEC-25: Tensor Core Matrix Multipliers Numerical Feature Testing
 Authors: Faizan A. Khattak, Mantas Mikaitis
 
