@@ -15,19 +15,19 @@ With the methods available here, you can investigate:
 
 This work is partially based on the earlier work of **M. Fasi et al.** [2], whose repository can be found [here](https://github.com/north-numerical-computing/tensor-cores-numerical-behavior).  
 
-
-**CUDA C++ File**
+## Related CUDA Files
 1. [**BF16**.cu](BF16.cu) is **CUDA** program file for brain float 16 tensor core numerical feature determination where test vectors are obtained from the above paper.
 2. [**FP16**.cu](FP16.cu) is **CUDA** program file for half precision (binary 16) tensor core numerical feature determination where test vectors are obtained from the above paper.
 3. [**TF32**.cu](TF32.cu) is **CUDA** program file for tensor float 32 tensor core numerical feature determination where test vectors are obtained from the above paper.
 4. These files can be run as they are on windows machine, for linux, may be some other header file have been to included.<br>
-  
+
+## Sample Output of RTX-3060 Tensor Cores Numerical Features 
 A sample output of the CUDA file for FP16 is shown below:<br>
 <img width="597" height="662" alt="image" src="https://github.com/user-attachments/assets/743c88c7-113b-42cd-9a96-85dcc9d5864a" /><br>
 
 ---------------------------------------------------------------------------------------------------------------------------------------<br>
 
-**MATLAB Files**<br>
+## MATLAB Block Fused Multiply Accumulate Model (BFMA) for Modeling different models of tensor cores
 These files require CPFloat library (can be found at [link](https://github.com/north-numerical-computing/cpfloat)) to be installed in Matlab.<br>
 Precision bits for input and output implicitly consider the implicit bit
 [**A100InnPrdModel**.m](A100InnPrdModel.m) is the model where alignment and normalisation rounding mode, extra alignment bits (neab) and FMA size can be set to model different model for BFMA or inner product. See a sample below where these parameters can be varied.<br>
@@ -37,6 +37,7 @@ Precision bits for input and output implicitly consider the implicit bit
 A sample output is shown below<br>
 
 
+## Sample Output for Matlab Based BFMA Model
 HPEC-25: Tensor Core Matrix Multipliers Numerical Feature Testing
 Authors: Faizan A. Khattak, Mantas Mikaitis
 
@@ -94,11 +95,7 @@ Delayed/Late normalization<br>
 --------------------------------------------------------------------------------------------------------------------------
 For simulating different BFMA models, change AlignRoundMode, NormRoundMode, extra alignment bits via neab, and the FMA size.
 
-References
---
-[1] Title: **Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I**<br>
-Author: **Faizan A Khattak**, **Mantas Mikaitis**<br>
-Conference: **HPEC** 2025.<br>
-[2] Title: **Numerical Behavior of the NVIDIA Tensor Cores**<br> 
-Author: **Massimiliano Fasi**, **Nicholas J. Higham**, **Mantas Mikaitis**, and **Srikara Pranesh** 
+## References
+[1] **Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I**, **Faizan A Khattak**, **Mantas Mikaitis**, **HPEC** 2025.<br>
+[2] **Numerical Behavior of the NVIDIA Tensor Cores**, **Massimiliano Fasi**, **Nicholas J. Higham**, **Mantas Mikaitis**, and **Srikara Pranesh** 
 Journal: **PeerJ Computer Science** 7:e330, 2021.
