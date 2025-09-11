@@ -1,6 +1,12 @@
-﻿/*
-HPEC-25 Paper CUDA code for TF32 input 
- */
+/*
+**Authors**: You (Faizan A. Khattak) and Mantas Mikaitis wrote the code.
+
+**Purpose**: It’s the implementation of your paper:
+“Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I” (HPEC 2025).
+
+**Acknowledgment**: The methodology/code builds on earlier work by Massimiliano Fasi et al., published in PeerJ Computer Science (2021). 
+You even included the exact DOI link to their paper: https://doi.org/10.7717/peerj-cs.330
+*/
 
 #include <assert.h>
 #include<cstdlib>
@@ -578,3 +584,4 @@ int main(int argc, char** argv) {
     cudaFree(d_b);
     cudaFree(d_c);
 }
+
