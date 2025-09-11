@@ -1,14 +1,14 @@
 Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers
 --
-
+This repository aims to provide the generalized testing methodology to determine the numerical features of matrix multipliers on most recent GPUs. 
+With test method available in this repo, various numerical features such as subnormal support, extra bits for alignment of significand in multiterm addition, extra carry bits, normalisation pattern in multiterm floating point addition, rounding modes, number of multiterm in inner product with single normalisation (FMA size) etc [1]. This work is partially based on the previous work of M. Fasi et.al. [2] whose repository can be found at [link](https://github.com/north-numerical-computing/tensor-cores-numerical-behavior).
 
 **CUDA C++ File**
 1. [**BF16**.cu](BF16.cu) is **CUDA** program file for brain float 16 tensor core numerical feature determination where test vectors are obtained from the above paper.
 2. [**FP16**.cu](FP16.cu) is **CUDA** program file for half precision (binary 16) tensor core numerical feature determination where test vectors are obtained from the above paper.
 3. [**TF32**.cu](TF32.cu) is **CUDA** program file for tensor float 32 tensor core numerical feature determination where test vectors are obtained from the above paper.
 4. These files can be run as they are on windows machine, for linux, may be some other header file have been to included.<br>
-   **Note**: These tests are generalized but partially based on the previous work of M. Fasi et. al. whose work can be found at [link](https://github.com/north-numerical-computing/tensor-cores-numerical-behavior)<br>  
-
+  
 A sample output of the CUDA file for FP16 is shown below:<br>
 <img width="597" height="662" alt="image" src="https://github.com/user-attachments/assets/743c88c7-113b-42cd-9a96-85dcc9d5864a" /><br>
 
@@ -83,7 +83,9 @@ For simulating different BFMA models, change AlignRoundMode, NormRoundMode, extr
 
 References
 --
-HPEC-25 Paper Simulation and Verification Files<br>
-Title: **Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I**<br>
+[1] Title: **Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I**<br>
 Author: **Faizan A Khattak**, **Mantas Mikaitis**<br>
-Conference: **HPEC** 2025.
+Conference: **HPEC** 2025.<br>
+[2] Title: **Numerical Behavior of the NVIDIA Tensor Cores**<br> 
+Author: **Massimiliano Fasi**, **Nicholas J. Higham**, **Mantas Mikaitis**, and **Srikara Pranesh** 
+Journal: **PeerJ Computer Science** 7:e330, 2021.
