@@ -17,15 +17,14 @@ A sample output of the CUDA file for FP16 is shown below:<br>
 ---------------------------------------------------------------------------------------------------------------------------------------<br>
 
 **MATLAB Files**<br>
-These files require CPFloat library (can be found at https://github.com/north-numerical-computing/cpfloat) to be installed in Matlab.<br>
-Precision bits for input and output include both mantissa and implicit bit
-**A100InnPrdModel.m** is the model where alignment and normalisation rounding mode, extra alignment bits (neab) and FMA size can be set to model different model for BFMA.<br>
+These files require CPFloat library (can be found at [link](https://github.com/north-numerical-computing/cpfloat)) to be installed in Matlab.<br>
+Precision bits for input and output implicitly consider the implicit bit
+[**A100InnPrdModel**.m](A100InnPrdModel.m) is the model where alignment and normalisation rounding mode, extra alignment bits (neab) and FMA size can be set to model different model for BFMA or inner product. See a sample below where these parameters can be varied.<br>
 <img width="881" height="140" alt="image" src="https://github.com/user-attachments/assets/5e1ab432-ff82-467f-af54-d8d85dced272" /><br>
 
-**HPEC_Test_File.m** applies the test vectors of the above paper to **A100InnPrdModel**.<br> 
+[**HPEC_Test_File**.m](HPEC_Test_File.m) applies the test vectors of the above paper to [**A100InnPrdModel**.m](A100InnPrdModel.m).<br> 
 A sample output is shown below<br>
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 HPEC-25: Tensor Core Matrix Multipliers Numerical Feature Testing
 Authors: Faizan A. Khattak, Mantas Mikaitis
@@ -79,10 +78,9 @@ Multiple Block FMA compilation for two BFMAs may reflect internal alignment roun
 ===============================================================
 
 Numerical Feature 10: Normalisation Pattern Within a BFMA<br>
-Delayed/Late normalization
+Delayed/Late normalization<br>
+--------------------------------------------------------------------------------------------------------------
 
-**===END===END===END===END===END===END===END===END===END===END===END**
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+For simulating different BFMA models, change AlignRoundMode, NormRoundMode, extra alignment bits via neab, and the FMA size.
 
-For simulating different BFMA models, change AlignRoundMode, NormRoundMode, extra alignment bits via neab or the FMA size.
 
