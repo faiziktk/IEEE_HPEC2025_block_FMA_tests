@@ -2,39 +2,39 @@ Generalized Methodology for Determining Numerical Features of Hardware Floating-
 --
 ## Overview
 
-This repository provides a **generalized testing methodology** for determining the **numerical features of matrix multipliers** on modern GPUs.  
+This repository provides code that implements the proof-of-concept of the methodology for determining the numerical features of matrix multipliers on modern GPUs, presented in [1]. The code is a based on the code developed by Fasi et al. [2] available at [north-numerical-computing/tensor-cores-numerical-behavior](https://github.com/north-numerical-computing/tensor-cores-numerical-behavior).
 
-With the methods available here, you can investigate:  
+The software can perform analysis of the following features of matrix multiplication:
 
-- Support for **subnormal numbers**  
-- Presence of **extra bits** for significand alignment in multi-term addition  
-- Availability of **extra carry bits**  
-- **Normalization patterns** in multi-term floating-point addition  
-- Supported **rounding modes**  
-- Effective **FMA size** (i.e., number of terms accumulated before a single normalization)  
-
-This work is partially based on the earlier work of **M. Fasi et al.** [2], whose repository can be found [here](https://github.com/north-numerical-computing/tensor-cores-numerical-behavior).  
+* Support for subnormal numbers
+* Presence of extra bits for significand alignment in multi-term addition
+* Availability of extra carry bits
+* Normalization patterns in multi-term floating-point addition
+* Supported rounding modes
+* Effective FMA size (i.e., number of terms accumulated before a single normalization)
 
 ## Related CUDA Files
-1. [**BF16**.cu](BF16.cu) CUDA program that applies the generalized test vectors to **Tensor Cores** using the **WMMA API**, with inputs in **bfloat16** format.  
 
-2. [**FP16**.cu](FP16.cu) CUDA program that runs the same test vectors in **binary16 (FP16)** format using the **WMMA API**.  
- 
-3. [**TF32**.cu](TF32.cu)   CUDA program that runs the tests in **TensorFloat-32 (TF32)** format. 
+1. [BF16.cu](BF16.cu) CUDA program that applies the generalized test vectors to Tensor Cores using the WMMA API, with inputs in bfloat16 format.  
+
+2. [FP16.cu](FP16.cu) CUDA program that runs the same test vectors in binary16 (FP16) format using the WMMA API.
+
+3. [TF32.cu](TF32.cu)   CUDA program that runs the tests in TensorFloat-32 (TF32) format. 
+
 4. These files can be run as they are on windows machine, for linux, may be some other header file have been to included.<br>
 
 ## Sample Output of RTX-3060 Tensor Cores Numerical Features 
+
 A sample output of the CUDA file for FP16 is shown below:<br>
 <img width="597" height="662" alt="image" src="https://github.com/user-attachments/assets/743c88c7-113b-42cd-9a96-85dcc9d5864a" /><br>
 
----------------------------------------------------------------------------------------------------------------------------------------<br>
-
 ## MATLAB Block Fused Multiply Accumulate Model (BFMA) for Modeling different models of tensor cores
-[**A100InnPrdModel**.m](A100InnPrdModel.m) is the model where alignment and normalisation rounding mode, extra alignment bits (neab) and FMA size can be set to model different model for BFMA or inner product. See a sample below where these parameters can be varied.<br>
+
+[A100InnPrdModel.m](A100InnPrdModel.m) is the model where alignment and normalisation rounding mode, extra alignment bits (neab) and FMA size can be set to model different model for BFMA or inner product. See a sample below where these parameters can be varied.<br>
 <img width="881" height="140" alt="image" src="https://github.com/user-attachments/assets/5e1ab432-ff82-467f-af54-d8d85dced272" /><br>
 
-[**HPEC_Test_File**.m](HPEC_Test_File.m) applies the test vectors in [1] to [**A100InnPrdModel**.m](A100InnPrdModel.m).<br> 
-**Note** These files require CPFloat library (can be found at [link](https://github.com/north-numerical-computing/cpfloat)) to be installed in Matlab.<br>
+[HPEC_Test_File.m](HPEC_Test_File.m) applies the test vectors in [1] to [A100InnPrdModel.m](A100InnPrdModel.m).<br> 
+Note These files require CPFloat library (can be found at [link](https://github.com/north-numerical-computing/cpfloat)) to be installed in Matlab.<br>
 Precision bits for input and output implicitly consider the implicit bit
 
 ## Sample Output for Matlab Based BFMA Model
@@ -97,6 +97,7 @@ Delayed/Late normalization<br>
 For simulating different BFMA models, change AlignRoundMode, NormRoundMode, extra alignment bits via neab, and the FMA size.
 
 ## References
-[1] **Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I**, **Faizan A Khattak**, **Mantas Mikaitis**, **HPEC** 2025.<br>
-[2] **Numerical Behavior of the NVIDIA Tensor Cores**, **Massimiliano Fasi**, **Nicholas J. Higham**, **Mantas Mikaitis**, and **Srikara Pranesh** 
-Journal: **PeerJ Computer Science** 7:e330, 2021.
+
+[1] Faizan A Khattak and Mantas Mikaitis, [Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I](https://eprints.whiterose.ac.uk/id/eprint/231310/). Accepted for 29th Annual IEEE High Performance Extreme Computing. Sep. 2025.<br>
+
+[2] Massimiliano Fasi, Nicholas J. Higham, Mantas Mikaitis, and Srikara Pranesh, [Numerical Behavior of the NVIDIA Tensor Cores](https://peerj.com/articles/cs-330/). PeerJ Computer Science, 7:e330. Feb. 2021.
