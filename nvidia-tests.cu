@@ -1,6 +1,13 @@
-/*
+/* Test numerical features of CUDA wmma instruction.
 
+   This test bench is based on the code in
+   https://github.com/north-numerical-computing/tensor-cores-numerical-behavior
 
+   Reference:
+     Faizan A Khattak and Mantas Mikaitis,
+     Generalized Methodology for Determining Numerical Features of Hardware
+     Floating-Point Matrix Multipliers: Part I.
+     Accepted for 29th Annual IEEE High Performance Extreme Computing. Sep. 2025.
  */
 
 #include <assert.h>
@@ -16,16 +23,19 @@
 
 using namespace nvcuda;
 
+/* Chose the input format of the tensor core (wmma)
+   by ucommenting one of the three options. */
+
 //#define IN_FORMAT_BF16
 //#define IN_FORMAT_FP16
 #define IN_FORMAT_TF32
 
-#define OUT_FORMAT float
-
+/* Set wmma shape */
 #define M 16
 #define N 16
 int pout = 24;
 
+/* Base on the input format, set up various parameters. */
 #ifdef IN_FORMAT_BF16
   #define IN_FORMAT nv_bfloat16
   #define WMMA_IN_FORMAT nv_bfloat16
@@ -47,6 +57,10 @@ int pout = 24;
   #define K 8
 #endif
 
+/* Set up the output format */
+#define OUT_FORMAT float
+
+
 /****************************************************
  * Memory management and wmma::mma_sync() interface *
  ****************************************************/
@@ -59,7 +73,8 @@ void host_reset(IN_FORMAT* a, IN_FORMAT* b, returntype* c) {
   memset(c, 0, 16 * 16 * sizeof(returntype));
 }
 
-/* Compute C += A*B, where A, B, and C are 16x16x16 matrices.
+
+/* Compute C += A*B, where A, B, and C are MxN matrices.
    The matrix C is initialized to 0 when `init` is true. */
 template <typename returntype>
 __global__ void wmma_ker(IN_FORMAT* a, IN_FORMAT* b,
@@ -86,6 +101,7 @@ __global__ void wmma_ker(IN_FORMAT* a, IN_FORMAT* b,
   // Store the output
   wmma::store_matrix_sync(c, c_fragment, N, wmma::mem_col_major);
 }
+
 
 /* Copy data from host to device, perform the operation, and copy result back to
    host. */
@@ -118,6 +134,7 @@ void printheader(FILE* outfile, const char* string) {
           "+--------------------------------------------------------------+\n");
 }
 
+
 /***************
  * EXPERIMENTS *
  ***************/
@@ -137,7 +154,6 @@ int main(int argc, char** argv) {
 
   FILE* outfile = stdout;
 
-
   /*------------------------------------------------------------
    * ------------------------------------------------------------
    *
@@ -145,10 +161,10 @@ int main(int argc, char** argv) {
    *
    * ------------------------------------------------------------
    --------------------------------------------------------------*/
-  int j = 0, eab = 0, neab = 0;  // j can be made any integer dependent upon exponent of input/output 
+  int j = 0, eab = 0, neab = 0;
   printheader(outfile, "Feature 1. Extra Alignment Bits Determination");// ;
   host_reset(h_a, h_b, h_c);
-  //single bit test existence
+  /* Single bit test existence */
   h_a[0] = CONVERSION_OP(ldexp(1, (-pout + j)));
   h_b[0] = CONVERSION_OP(1);
   h_a[1] = CONVERSION_OP(ldexp(1, (-pout + j)));
@@ -158,7 +174,7 @@ int main(int argc, char** argv) {
   if (h_c[0] == (pow(2, j) + 2 * ldexp(1, -pout + j)))
     {
       printf("-> One bit existence test: Passed\n");
-      eab = 1; /*extra alignment bit exist*/
+      eab = 1; /* Extra alignment bit exist */
       neab = 1;
     }
   else
@@ -166,7 +182,7 @@ int main(int argc, char** argv) {
       printf("-> One bit existence test: Failed\n");
     }
 
-  //two bits test existence
+  /* Two bits test existence */
   h_a[0] = CONVERSION_OP(ldexp(1, (-pout + j)));
   h_b[0] = CONVERSION_OP(1);
 
@@ -181,7 +197,7 @@ int main(int argc, char** argv) {
     {
       printf("-> Two bits existence test: Passed\n");
       neab = 2;
-      eab = 1; /*extra alignment bit exist*/
+      eab = 1; /* Extra alignment bit exist */
     }
   else
     {
@@ -249,7 +265,7 @@ int main(int argc, char** argv) {
    *
    * ------------------------------------------------------------
    --------------------------------------------------------------*/
-  // eab=1,ecb=1; in this case, 
+  /* eab=1, ecb=1; in this case, */
   printheader(outfile, "Feature 4. Normalisation pattern in BFMA");// ;
   int t = 3; // for example, from HPEC-25 paper
   host_reset(h_a, h_b, h_c);
@@ -259,22 +275,18 @@ int main(int argc, char** argv) {
   h_b[1] = CONVERSION_OP(1);
   h_c[0] = 1 - (ldexp(1, -pout + t));
   wmma_init_run(h_a, h_b, h_c, d16_a, d16_b, d_c, false);
-  if (h_c[0] == (1 + ldexp(1, -pout + t) + ldexp(1, -pout + 1)))
-    {
-      printf("-> Delayed/Late normalisation\n");
-    }
-  else if (h_c[0] == (1 + ldexp(1, -pout + t)))
-    {
-      printf("-> Immediate normalisation with RD/RN/TRC/RZ\n");
-    }
-  else if (h_c[0] == (1 + ldexp(1, -pout + t) + ldexp(1, -pout + 2)))
-    {
-      printf("-> Immediate normalisation with RU\n");
-    }
-  else
-    {
-      printf("-> This test is not working!\n");
-    }
+  if (h_c[0] == (1 + ldexp(1, -pout + t) + ldexp(1, -pout + 1))) {
+    printf("-> Delayed/Late normalisation\n");
+  }
+  else if (h_c[0] == (1 + ldexp(1, -pout + t))) {
+    printf("-> Immediate normalisation with RD/RN/TRC/RZ\n");
+  }
+  else if (h_c[0] == (1 + ldexp(1, -pout + t) + ldexp(1, -pout + 2))) {
+    printf("-> Immediate normalisation with RU\n");
+  }
+  else {
+    printf("-> This test is not working!\n");
+  }
 
 
   /*------------------------------------------------------------
@@ -284,7 +296,7 @@ int main(int argc, char** argv) {
    *
    * ------------------------------------------------------------
    --------------------------------------------------------------*/
-  // assuming FMA size is 3 or more for this case
+  /* Assuming FMA size is 3 or more for this case */
   j = 0; // any integer within max min limit definde by exponent
   OUT_FORMAT h_c_pos = 0, h_c_neg = 0, h_c_temp = 0;
   printheader(outfile, "Feature 5. Rounding Mode for final output in SP of a BFMA");// ;
@@ -305,29 +317,22 @@ int main(int argc, char** argv) {
   wmma_init_run(h_a, h_b, h_c, d16_a, d16_b, d_c, false);
   h_c_neg = h_c[0];
 
-  if (h_c_pos == ldexp(1, j + 2) & h_c_neg == -ldexp(1, j + 2))
-    {
-      printf("-> Round towards zero/truncation\n");
+  if (h_c_pos == ldexp(1, j + 2) & h_c_neg == -ldexp(1, j + 2)) {
+    printf("-> Round towards zero/truncation\n");
+  }
 
-    }
-
-  else if (h_c_pos == (ldexp(1, j + 2) + ldexp(1, -pout + j + 3)) & h_c_neg == -(ldexp(1, j + 2) + ldexp(1, -pout + j + 3)))
-    {
-      printf("-> Round to nearest (even)\n");
-
-    }
-  else if (h_c_pos == (ldexp(1, j + 2) + ldexp(1, -pout + j + 3)) & h_c_neg == -(ldexp(1, j + 2)))
-    {
-      printf("-> Round up!\n");
-    }
-  else if (h_c_pos == (ldexp(1, j + 2)) & h_c_neg == -(ldexp(1, j + 2) + ldexp(1, -pout + j + 3)))
-    {
-      printf("-> Round down\n");
-    }
-  else
-    {
-      printf("-> This test is not working!\n");
-    }
+  else if (h_c_pos == (ldexp(1, j + 2) + ldexp(1, -pout + j + 3)) & h_c_neg == -(ldexp(1, j + 2) + ldexp(1, -pout + j + 3))) {
+    printf("-> Round to nearest (even)\n");
+  }
+  else if (h_c_pos == (ldexp(1, j + 2) + ldexp(1, -pout + j + 3)) & h_c_neg == -(ldexp(1, j + 2))) {
+    printf("-> Round up!\n");
+  }
+  else if (h_c_pos == (ldexp(1, j + 2)) & h_c_neg == -(ldexp(1, j + 2) + ldexp(1, -pout + j + 3))) {
+    printf("-> Round down\n");
+  }
+  else {
+    printf("-> This test is not working!\n");
+  }
 
 
 #ifdef IN_FORMAT_FP16
@@ -338,7 +343,7 @@ int main(int argc, char** argv) {
    *
    * ------------------------------------------------------------
    --------------------------------------------------------------*/
-  // assuming FMA size is 3 or more for this case
+  /* Assuming FMA size is 3 or more for this case */
   j = 0; // any integer within max min limit definde by exponent
   half h16_c_pos = 0, h16_c_neg = 0;
   printheader(outfile, "Feature 6. Rounding Mode for final output in fp16 of a BFMA");// ;
@@ -364,29 +369,22 @@ int main(int argc, char** argv) {
   h16_c_neg = h16_c[0];
 
 
-  if (h16_c_pos == __float2half(ldexp(1, j + 2)) & h16_c_neg == __float2half (- ldexp(1, j + 2)))
-    {
-      printf("-> Round towards zero/truncation\n");
+  if (h16_c_pos == __float2half(ldexp(1, j + 2)) & h16_c_neg == __float2half (- ldexp(1, j + 2))) {
+    printf("-> Round towards zero/truncation\n");
+  }
 
-    }
-
-  else if (h16_c_pos == __float2half(ldexp(1, j + 2) + ldexp(1, -pout16 + j + 3)) & h16_c_neg == __float2half(-ldexp(1, j + 2) - ldexp(1, -pout16 + j + 3)))
-    {
-      printf("-> Round to nearest (even)\n");
-
-    }
-  else if (h16_c_pos == __float2half(ldexp(1, j + 2) + ldexp(1, -pout16 + j + 3)) & h16_c_neg == __float2half(-ldexp(1, j + 2)))
-    {
-      printf("-> Round up!\n");
-    }
-  else if (h16_c_pos == __float2half(ldexp(1, j + 2)) & h16_c_neg == __float2half(-ldexp(1, j + 2) - ldexp(1, -pout16 + j + 3)))
-    {
-      printf("-> Round down\n");
-    }
-  else
-    {
-      printf("-> This test is not working!\n");
-    }
+  else if (h16_c_pos == __float2half(ldexp(1, j + 2) + ldexp(1, -pout16 + j + 3)) & h16_c_neg == __float2half(-ldexp(1, j + 2) - ldexp(1, -pout16 + j + 3))) {
+    printf("-> Round to nearest (even)\n");
+  }
+  else if (h16_c_pos == __float2half(ldexp(1, j + 2) + ldexp(1, -pout16 + j + 3)) & h16_c_neg == __float2half(-ldexp(1, j + 2))) {
+    printf("-> Round up!\n");
+  }
+  else if (h16_c_pos == __float2half(ldexp(1, j + 2)) & h16_c_neg == __float2half(-ldexp(1, j + 2) - ldexp(1, -pout16 + j + 3))) {
+    printf("-> Round down\n");
+  }
+  else {
+    printf("-> This test is not working!\n");
+  }
 #endif
 
 
@@ -397,11 +395,11 @@ int main(int argc, char** argv) {
    *
    * ------------------------------------------------------------
    --------------------------------------------------------------*/
-  // assuming FMA size is 3 or more for this case
+  /* Assuming FMA size is 3 or more for this case */
   j = 0; // any integer within max min limit definde by exponent
   printheader(outfile, "Feature 6. Rounding Mode for significand alignment");// ;
   host_reset(h_a, h_b, h_c);
-  // neab is computed above, so should work, below works for 1 and 2
+  /* neab is computed above, so should work, below works for 1 and 2 */
   h_c[0] = ldexp(1, j);
   h_a[0] = CONVERSION_OP(ldexp(1, -pout + j));
   h_a[1] = h_a[0];
@@ -418,29 +416,22 @@ int main(int argc, char** argv) {
   wmma_init_run(h_a, h_b, h_c, d16_a, d16_b, d_c, false);
   h_c_neg = h_c[0];
 
-  if (h_c_pos == ldexp(1, j) & h_c_neg == -ldexp(1, j))
-    {
-      printf("-> Round towards zero/truncation\n");
+  if (h_c_pos == ldexp(1, j) & h_c_neg == -ldexp(1, j)) {
+    printf("-> Round towards zero/truncation\n");
+  }
 
-    }
-
-  else if (h_c_pos == (ldexp(1, j) + ldexp(1, -pout + j + 2 - neab)) & h_c_neg == -(ldexp(1, j) + ldexp(1, -pout + j + 2 - neab)))
-    {
-      printf("-> Round to nearest (even)\n");
-
-    }
-  else if (h_c_pos == (ldexp(1, j) + ldexp(1, -pout + j + 2 - neab)) & h_c_neg == -(ldexp(1, j)))
-    {
-      printf("-> Round up!\n");
-    }
-  else if (h_c_pos == (ldexp(1, j)) & h_c_neg == -(ldexp(1, j) + ldexp(1, -pout + j + 2 - neab)))
-    {
-      printf("-> Round down\n");
-    }
-  else
-    {
-      printf("-> This test is not working!\n");
-    }
+  else if (h_c_pos == (ldexp(1, j) + ldexp(1, -pout + j + 2 - neab)) & h_c_neg == -(ldexp(1, j) + ldexp(1, -pout + j + 2 - neab))) {
+    printf("-> Round to nearest (even)\n");
+  }
+  else if (h_c_pos == (ldexp(1, j) + ldexp(1, -pout + j + 2 - neab)) & h_c_neg == -(ldexp(1, j))) {
+    printf("-> Round up!\n");
+  }
+  else if (h_c_pos == (ldexp(1, j)) & h_c_neg == -(ldexp(1, j) + ldexp(1, -pout + j + 2 - neab))) {
+    printf("-> Round down\n");
+  }
+  else {
+    printf("-> This test is not working!\n");
+  }
 
 
   /*------------------------------------------------------------
@@ -450,11 +441,11 @@ int main(int argc, char** argv) {
    *
    * ------------------------------------------------------------
    --------------------------------------------------------------*/
-  // assuming FMA size is 3 or more for this case
+  /* Assuming FMA size is 3 or more for this case */
   j = 0; // any integer within max min limit definde by exponent
   printheader(outfile, "Feature 7. Rounding Mode Compilation of Multiple BFMA output");// ;
   host_reset(h_a, h_b, h_c);
-  // NFMA has been computed above, so should work
+  /* NFMA has been computed above, so should work */
   h_c[0] = 1 + ldexp(1, -pout + 1);
   h_a[NFMA] = CONVERSION_OP(ldexp(1, -pout));
   h_b[NFMA] = CONVERSION_OP(ldexp(1, 0) + ldexp(1, -1));
@@ -471,31 +462,22 @@ int main(int argc, char** argv) {
   rz_const = 1 + ldexp(1, -pout + 1);
   rne_const = 1 + ldexp(1, -pout + 2);
 
+  if (h_c_pos == rz_const & h_c_neg == -rz_const) {
+    printf("-> Round towards zero/truncation\n");
+  }
 
-
-  if (h_c_pos == rz_const & h_c_neg == -rz_const)
-    {
-      printf("-> Round towards zero/truncation\n");
-
-    }
-
-  else if (h_c_pos == rne_const & h_c_neg == -rne_const)
-    {
-      printf("-> Round to nearest (even)\n");
-
-    }
-  else if (h_c_pos == rne_const & h_c_neg == -rz_const)
-    {
-      printf("-> Round up!\n");
-    }
-  else if (h_c_pos == rz_const & h_c_neg == -rne_const)
-    {
-      printf("-> Round down\n");
-    }
-  else
-    {
-      printf("-> This test is not working!\n");
-    }
+  else if (h_c_pos == rne_const & h_c_neg == -rne_const) {
+    printf("-> Round to nearest (even)\n");
+  }
+  else if (h_c_pos == rne_const & h_c_neg == -rz_const) {
+    printf("-> Round up!\n");
+  }
+  else if (h_c_pos == rz_const & h_c_neg == -rne_const) {
+    printf("-> Round down\n");
+  }
+  else {
+    printf("-> This test is not working!\n");
+  }
 
   /*------------------------------------------------------------
    * ------------------------------------------------------------
@@ -504,11 +486,11 @@ int main(int argc, char** argv) {
    *
    * ------------------------------------------------------------
    --------------------------------------------------------------*/
-  // assuming FMA size is 3 or more for this case
+  /* Assuming FMA size is 3 or more for this case */
   j = 0; // any integer within max min limit definde by exponent
   printheader(outfile, "Feature 9. Rounding Mode in Significands Alignment");// ;
   host_reset(h_a, h_b, h_c);
-  // NFMA has been computed above, so should work
+  /* NFMA has been computed above, so should work */
   h_c[0] = pow(2, j);
   h_a[0] = CONVERSION_OP(ldexp(1, -pout + j));
   h_a[1] = CONVERSION_OP(ldexp(1, -pout + j));
@@ -532,33 +514,24 @@ int main(int argc, char** argv) {
   rz_const = pow(2, j);
   rne_const = pow(2, j) + ldexp(1, -pout + j + 2 - neab);
 
+  if (h_c_pos == rz_const & h_c_neg == -rz_const) {
+    printf("-> Round towards zero/truncation\n");
+  }
 
+  else if (h_c_pos == rne_const & h_c_neg == -rne_const) {
+    printf("-> Round to nearest (even)\n");
+  }
+  else if (h_c_pos == rne_const & h_c_neg == -rz_const) {
+    printf("-> Round up!\n");
+  }
+  else if (h_c_pos == rz_const & h_c_neg == -rne_const) {
+    printf("-> Round down\n");
+  }
+  else {
+    printf("-> This test is not working!\n");
+  }
 
-  if (h_c_pos == rz_const & h_c_neg == -rz_const)
-    {
-      printf("-> Round towards zero/truncation\n");
-
-    }
-
-  else if (h_c_pos == rne_const & h_c_neg == -rne_const)
-    {
-      printf("-> Round to nearest (even)\n");
-
-    }
-  else if (h_c_pos == rne_const & h_c_neg == -rz_const)
-    {
-      printf("-> Round up!\n");
-    }
-  else if (h_c_pos == rz_const & h_c_neg == -rne_const)
-    {
-      printf("-> Round down\n");
-    }
-  else
-    {
-      printf("-> This test is not working!\n");
-    }
-
-  // Free dynamically allocated memory.
+  /* Free dynamically allocated memory. */
   free(h_a);
   free(h_b);
   free(h16_c);
