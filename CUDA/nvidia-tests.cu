@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
     neab = 2;
   }
   else {
-    printf("->Two bits existence test: Failed\n");
+    printf("-> Two bits existence test: Failed\n");
   }
 
 

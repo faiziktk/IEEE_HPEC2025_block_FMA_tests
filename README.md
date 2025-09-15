@@ -29,7 +29,7 @@ $./nvidia-tests
 | Feature 1. Extra Alignment Bits Determination                |
 +--------------------------------------------------------------+
 -> One bit existence test: Passed
-->Two bits existence test: Failed
+-> Two bits existence test: Failed
 +--------------------------------------------------------------+
 | Feature 2. Extra carry bits determination fp16/bf16 inputs   |
 +--------------------------------------------------------------+
