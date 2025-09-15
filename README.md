@@ -66,15 +66,22 @@ The FMA size is: 8
 
 ## MATLAB block fused multiply accumulate model (BFMA) for modeling different models of tensor cores
 
-[A100InnPrdModel.m](MATLAB/A100InnPrdModel.m) is the model where alignment and normalisation rounding mode, extra alignment bits (neab) and FMA size can be set to model different model for BFMA or inner product. See a sample below where these parameters can be varied.<br>
-<img width="881" height="140" alt="image" src="https://github.com/user-attachments/assets/5e1ab432-ff82-467f-af54-d8d85dced272" /><br>
+[A100InnPrdModel.m](MATLAB/A100InnPrdModel.m) is the model where alignment and normalisation rounding mode, number of extra significand alignment bits and block FMA size can be configured, to create different models. See a sample below where these parameters can be varied.<br>
+
+```
+% Vary these below parameter to simulate a different model
+NormRoundMode='RNE'; % TRC, RU, RD, RNE rounding mode work
+AlignRoundMode='RD'; % TRC, RU, RD, RNE rounding modes
+neab=1; % extra alignment bits can be varied, 0,1 for alignment rounding mode only,
+NFMA=8;
+```
 
 [HPEC_Test_File.m](MATLAB/HPEC_Test_File.m) applies the test vectors in [1] to [A100InnPrdModel.m](MATLAB/A100InnPrdModel.m).<br> 
-Note These files require CPFloat library (can be found at [link](https://github.com/north-numerical-computing/cpfloat)) to be installed in Matlab.<br>
-Precision bits for input and output implicitly consider the implicit bit
+
+The MATLAB experiments require the [CPFloat library](https://github.com/north-numerical-computing/cpfloat)).<br>
 
 ## Sample output for matlab based BFMA model
-Runing [HPEC_Test_File](MATLAB/HPEC_Test_File.m) would output following numerical features of the model simulated by the user by setting the parameter mentioned above.<br>
+Runing [HPEC_Test_File](MATLAB/HPEC_Test_File.m) would output the following numerical features of the model simulated by the user by setting the parameters mentioned above.<br>
 
 ```
 HPEC-25: Tensor Core Matrix Multipliers Numerical Feature Testing
@@ -133,7 +140,7 @@ Delayed/Late normalization<br>
 ```
 
 --------------------------------------------------------------------------------------------------------------------------
-For simulating different BFMA models, change AlignRoundMode, NormRoundMode, extra alignment bits via neab, and the FMA size.
+For simulating different BFMA models, change AlignRoundMode, NormRoundMode, extra alignment bits via neab, and the FMA size in [A100InnPrdModel.m](MATLAB/A100InnPrdModel.m).
 
 ## References
 
