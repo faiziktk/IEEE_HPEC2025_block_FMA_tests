@@ -15,18 +15,54 @@ The software can perform analysis of the following features of matrix multiplica
 
 ## Related CUDA Files
 
-1. [BF16.cu](BF16.cu) CUDA program that applies the generalized test vectors to Tensor Cores using the WMMA API, with inputs in bfloat16 format.  
+[nvidia-tests.cu](nvidia-tests.cu) CUDA program that applies the generalized test vectors to Tensor Cores using the WMMA API, with inputs in binary16/bfloat16/TensorFloat32. See the macros at the top of the file to select the input format.
 
-2. [FP16.cu](FP16.cu) CUDA program that runs the same test vectors in binary16 (FP16) format using the WMMA API.
-
-3. [TF32.cu](TF32.cu)   CUDA program that runs the tests in TensorFloat-32 (TF32) format. 
-
-4. These files can be run as they are on windows machine, for linux, may be some other header file have been to included.<br>
-
-## Sample Output of RTX-3060 Tensor Cores Numerical Features 
+## Sample Output of NVIDIA A30 Tensor Cores Numerical Features 
 
 A sample output of the CUDA file for FP16 is shown below:<br>
-<img width="597" height="662" alt="image" src="https://github.com/user-attachments/assets/743c88c7-113b-42cd-9a96-85dcc9d5864a" /><br>
+
+```
+$ nvcc -arch=sm_80 nvidia-tests.cu -o nvidia-tests
+$./nvidia-tests
+
++--------------------------------------------------------------+
+| Feature 1. Extra Alignment Bits Determination                |
++--------------------------------------------------------------+
+-> One bit existence test: Passed
+->Two bits existence test: Failed
++--------------------------------------------------------------+
+| Feature 2. Extra carry bits determination fp16/bf16 inputs   |
++--------------------------------------------------------------+
+Number of extra bits detected are: 3
++--------------------------------------------------------------+
+| Feature 3. FMA size for fp16/bf16 inputs                     |
++--------------------------------------------------------------+
+The FMA size is: 8
++--------------------------------------------------------------+
+| Feature 4. Normalisation pattern in BFMA                     |
++--------------------------------------------------------------+
+-> Delayed/Late normalisation
++--------------------------------------------------------------+
+| Feature 5. Rounding Mode for final output in SP of a BFMA    |
++--------------------------------------------------------------+
+-> Round towards zero/truncation
++--------------------------------------------------------------+
+| Feature 6. Rounding Mode for final output in fp16 of a BFMA  |
++--------------------------------------------------------------+
+-> Round to nearest (even)
++--------------------------------------------------------------+
+| Feature 6. Rounding Mode for significand alignment           |
++--------------------------------------------------------------+
+-> Round towards zero/truncation
++--------------------------------------------------------------+
+| Feature 7. Rounding Mode Compilation of Multiple BFMA output |
++--------------------------------------------------------------+
+-> Round towards zero/truncation
++--------------------------------------------------------------+
+| Feature 9. Rounding Mode in Significands Alignment           |
++--------------------------------------------------------------+
+-> Round towards zero/truncation
+```
 
 ## MATLAB Block Fused Multiply Accumulate Model (BFMA) for Modeling different models of tensor cores
 
