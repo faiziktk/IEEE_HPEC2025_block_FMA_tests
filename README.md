@@ -17,7 +17,7 @@ The software can perform analysis of the following features of matrix multiplica
 
 [nvidia-tests.cu](CUDA/nvidia-tests.cu): CUDA code that applies the generalized test vectors [1] to test matrix multipliers using the WMMA API, with inputs in binary16/bfloat16/TensorFloat32. The macros at the top of the file allow to select the input format.
 
-## Sample Output of NVIDIA A30 Tensor Cores Numerical Features
+## Sample output of NVIDIA A30 tensor cores numerical features
 
 A sample output of the CUDA file for FP16 is shown below:<br>
 
@@ -64,7 +64,7 @@ The FMA size is: 8
 -> Round towards zero/truncation
 ```
 
-## MATLAB Block Fused Multiply Accumulate Model (BFMA) for Modeling different models of tensor cores
+## MATLAB block fused multiply accumulate model (BFMA) for modeling different models of tensor cores
 
 [A100InnPrdModel.m](MATLAB/A100InnPrdModel.m) is the model where alignment and normalisation rounding mode, extra alignment bits (neab) and FMA size can be set to model different model for BFMA or inner product. See a sample below where these parameters can be varied.<br>
 <img width="881" height="140" alt="image" src="https://github.com/user-attachments/assets/5e1ab432-ff82-467f-af54-d8d85dced272" /><br>
@@ -73,8 +73,10 @@ The FMA size is: 8
 Note These files require CPFloat library (can be found at [link](https://github.com/north-numerical-computing/cpfloat)) to be installed in Matlab.<br>
 Precision bits for input and output implicitly consider the implicit bit
 
-## Sample Output for Matlab Based BFMA Model
+## Sample output for matlab based BFMA model
 Runing [HPEC_Test_File](MATLAB/HPEC_Test_File.m) would output following numerical features of the model simulated by the user by setting the parameter mentioned above.<br>
+
+```
 HPEC-25: Tensor Core Matrix Multipliers Numerical Feature Testing
 Authors: Faizan A. Khattak, Mantas Mikaitis
 
@@ -128,6 +130,7 @@ Multiple Block FMA compilation for two BFMAs may reflect internal alignment roun
 
 Numerical Feature 10: Normalisation Pattern Within a BFMA<br>
 Delayed/Late normalization<br>
+```
 
 --------------------------------------------------------------------------------------------------------------------------
 For simulating different BFMA models, change AlignRoundMode, NormRoundMode, extra alignment bits via neab, and the FMA size.
