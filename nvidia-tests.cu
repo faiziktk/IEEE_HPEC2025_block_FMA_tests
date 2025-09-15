@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
    *
    * ------------------------------------------------------------
    --------------------------------------------------------------*/
-  int j = 0, eab = 0, neab = 0;
+  int j = 0, neab = 0;
   printheader(outfile, "Feature 1. Extra Alignment Bits Determination");
   host_reset(h_a, h_b, h_c);
   /* Single bit test existence */
@@ -173,7 +173,6 @@ int main(int argc, char** argv) {
   wmma_init_run(h_a, h_b, h_c, d16_a, d16_b, d_c, false);
   if (h_c[0] == (pow(2, j) + 2 * ldexp(1, -pout + j))) {
     printf("-> One bit existence test: Passed\n");
-    eab = 1; /* Extra alignment bit exist */
     neab = 1;
   }
   else {
@@ -194,7 +193,6 @@ int main(int argc, char** argv) {
   if (h_c[0] == (pow(2, j) + 2 * ldexp(1, -pout + j))) {
     printf("-> Two bits existence test: Passed\n");
     neab = 2;
-    eab = 1; /* Extra alignment bit exist */
   }
   else {
     printf("->Two bits existence test: Failed\n");
@@ -209,7 +207,7 @@ int main(int argc, char** argv) {
    * ------------------------------------------------------------
    --------------------------------------------------------------*/
   /*Assuming the FMA size is less than permitted max shared dimension of tc*/
-  int k = 2, necb = 0, NFMA = 0, ecb = 0;;
+  int k = 2, necb = 0, NFMA = 0;
   OUT_FORMAT d_pos = 0,d_neg=0;
   while (k < 15) {
     host_reset(h_a, h_b, h_c);
@@ -232,8 +230,6 @@ int main(int argc, char** argv) {
     if (d_pos != (2 + ldexp(1, -pout + 2)) && abs(d_neg) !=
         (2 + ldexp(1, -pout + 2))) {
       NFMA = k - 1;
-      ecb = 1;
-
       break;
     }
     necb = floor(log2(k*(2-ldexp(1,-pin+1))));
