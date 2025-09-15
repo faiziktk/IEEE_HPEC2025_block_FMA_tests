@@ -15,9 +15,9 @@ The software can perform analysis of the following features of matrix multiplica
 
 ## Related CUDA Files
 
-[nvidia-tests.cu](nvidia-tests.cu) CUDA program that applies the generalized test vectors to Tensor Cores using the WMMA API, with inputs in binary16/bfloat16/TensorFloat32. See the macros at the top of the file to select the input format.
+[nvidia-tests.cu](nvidia-tests.cu): CUDA code that applies the generalized test vectors [1] to test matrix multipliers using the WMMA API, with inputs in binary16/bfloat16/TensorFloat32. The macros at the top of the file allow to select the input format.
 
-## Sample Output of NVIDIA A30 Tensor Cores Numerical Features 
+## Sample Output of NVIDIA A30 Tensor Cores Numerical Features
 
 A sample output of the CUDA file for FP16 is shown below:<br>
 
