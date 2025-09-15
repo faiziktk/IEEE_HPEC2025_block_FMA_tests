@@ -4,7 +4,7 @@
  */
 
 #include <assert.h>
-#include<cstdlib>
+#include <cstdlib>
 #include <cstdint>
 #include <chrono>
 #include <iostream>
@@ -12,28 +12,39 @@
 #include <mma.h>
 #include <iomanip>
 #include <cuda_bf16.h>
+#include <cuda_fp16.h>
 
 using namespace nvcuda;
 
-#define IN_FORMAT nv_bfloat16
-// #define IN_FORMAT half
-// #define IN_FORMAT float
+//#define IN_FORMAT_BF16
+//#define IN_FORMAT_FP16
+#define IN_FORMAT_TF32
 
 #define OUT_FORMAT float
 
+#define M 16
+#define N 16
 int pout = 24;
-#if IN_FORMAT == nv_bfloat16
+
+#ifdef IN_FORMAT_BF16
+  #define IN_FORMAT nv_bfloat16
   #define WMMA_IN_FORMAT nv_bfloat16
   #define CONVERSION_OP  __float2bfloat16
   int pin = 8;
-#elif IN_FORMAT == half
+  #define K 16
+#elif defined(IN_FORMAT_FP16)
+  #define IN_FORMAT half
   #define WMMA_IN_FORMAT half
   #define CONVERSION_OP  __float2half
   int pin = 11;
-#elif IN_FORMAT = float
+  int pout16 = 11;
+  #define K 16
+#elif defined(IN_FORMAT_TF32)
+  #define IN_FORMAT float
   #define WMMA_IN_FORMAT wmma::precision::tf32
   int pin = 11;
   #define CONVERSION_OP
+  #define K 8
 #endif
 
 /****************************************************
@@ -55,25 +66,25 @@ __global__ void wmma_ker(IN_FORMAT* a, IN_FORMAT* b,
                          returntype* c, bool init) {
 
   // Declare fragments.
-  wmma::fragment<wmma::matrix_a, 16, 16, 16, WMMA_IN_FORMAT,
+  wmma::fragment<wmma::matrix_a, M, N, K, WMMA_IN_FORMAT,
     wmma::row_major> a_fragment;
-  wmma::fragment<wmma::matrix_b, 16, 16, 16, WMMA_IN_FORMAT,
+  wmma::fragment<wmma::matrix_b, M, N, K, WMMA_IN_FORMAT,
     wmma::col_major> b_fragment;
-  wmma::fragment<wmma::accumulator, 16, 16, 16, returntype> c_fragment;
+  wmma::fragment<wmma::accumulator, M, N, K, returntype> c_fragment;
 
   // Load input matrices and initialize output (if required).
-  wmma::load_matrix_sync(a_fragment, a, 16);
-  wmma::load_matrix_sync(b_fragment, b, 16);
+  wmma::load_matrix_sync(a_fragment, a, N);
+  wmma::load_matrix_sync(b_fragment, b, M);
   if (init)
     wmma::fill_fragment(c_fragment, 0.0f);
   else
-    wmma::load_matrix_sync(c_fragment, c, 16, wmma::mem_col_major);
+    wmma::load_matrix_sync(c_fragment, c, N, wmma::mem_col_major);
 
   // Multiply
   wmma::mma_sync(c_fragment, a_fragment, b_fragment, c_fragment);
 
   // Store the output
-  wmma::store_matrix_sync(c, c_fragment, 16, wmma::mem_col_major);
+  wmma::store_matrix_sync(c, c_fragment, N, wmma::mem_col_major);
 }
 
 /* Copy data from host to device, perform the operation, and copy result back to
@@ -117,15 +128,14 @@ int main(int argc, char** argv) {
   h_a = new IN_FORMAT[16 * 16];
   h_b = new IN_FORMAT[16 * 16];
   h_c = new OUT_FORMAT[16 * 16];
-  h16_c = new half[M * N];
+  h16_c = new IN_FORMAT[M * N];
 
   cudaMalloc(&d16_a, 16 * 16 * sizeof(IN_FORMAT));
   cudaMalloc(&d16_b, 16 * 16 * sizeof(IN_FORMAT));
-  cudaMalloc(&d16_c, M * N * sizeof(half));
+  cudaMalloc(&d16_c, M * N * sizeof(IN_FORMAT));
   cudaMalloc(&d_c, 16 * 16 * sizeof(OUT_FORMAT));
 
   FILE* outfile = stdout;
-  bool pass;
 
 
   /*------------------------------------------------------------
@@ -320,7 +330,7 @@ int main(int argc, char** argv) {
     }
 
 
-#if IN_FORMAT = half
+#ifdef IN_FORMAT_FP16
   /*------------------------------------------------------------
    * ------------------------------------------------------------
    *
@@ -557,8 +567,4 @@ int main(int argc, char** argv) {
   cudaFree(d16_c);
   cudaFree(d_c);
   free(h_c);
-
-  system("pause");  // Press any key to continue...
-  return 0;
-
 }
