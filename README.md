@@ -142,7 +142,7 @@ Delayed/Late normalization<br>
 --------------------------------------------------------------------------------------------------------------------------
 For simulating different BFMA models, change AlignRoundMode, NormRoundMode, extra alignment bits via neab, and the FMA size in [A100InnPrdModel.m](MATLAB/A100InnPrdModel.m).
 
-## References
+## References --
 
 [1] Faizan A Khattak and Mantas Mikaitis, [Generalized Methodology for Determining Numerical Features of Hardware Floating-Point Matrix Multipliers: Part I](https://eprints.whiterose.ac.uk/id/eprint/231310/). Accepted for 29th Annual IEEE High Performance Extreme Computing. Sep. 2025.<br>
 
